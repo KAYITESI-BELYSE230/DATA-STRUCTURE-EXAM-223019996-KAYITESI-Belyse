@@ -1,0 +1,14 @@
+I was given a project number 39 and it was about a library for graph adjacency lists stored in dynamic arrays, with one base class called graphbase and two classes derived
+from it, directedgraph and weightedgraph.
+there was five tasks in the program to be implamented and each have been completed.
+the first one was about defining structs edge and vertex with their parameters as given,and allocate each vertex's edge dynamically. those structs have been defined as shown
+at the beginning of the program and they are for presenting an edge connecting vertex to another and storing vertex IDs and dynamic list of edges.
+Other tasks were about creating an abstract class called graphbase with virtual void addedge()function and delivering two classes from it, directedgraph and weightedgraph and 
+those derived classes were to show inheritance and polymorphism.the task was completed on the block that follows that of structs,and those derived class has a destructor 
+for cleaning the dynamic memory, and consists of functions such as addvertex() and removevertex() that will allow to add avertex and its id and delete it using its id,
+and after an operation, it will create a new array for all vertices available and delete the old one. there is also a another funtion called display() that will print out all 
+vertices and their edges in the form of (to, from). we are also having a function addedge() as given in the task adds edges on both directed and weighted graphs with weight,
+copies vertyices from old edge array to new edge array and add a vertex to the new array, and deletes the old array to free memory.
+we are having the main function that is helping to read number of vertices and edges, adding edges and vertices with their IDs  in both graphs, receiving weight entered by user,
+removing the vertex using its ID given by a user, exiting program if a user asks too,and displaying adjacency list for both graphs as outputs. generally, the main function is
+managing the user inputs and providing outputs.
