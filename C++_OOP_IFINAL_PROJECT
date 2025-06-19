@@ -1,0 +1,140 @@
+I was given a project number 39 and it was about a library for graph adjacency lists stored in dynamic arrays, with one base class called graphbase and two classes derived
+from it, directedgraph and weightedgraph.
+there was five tasks in the program to be implamented and each have been completed.
+the first one was about defining structs edge and vertex with their parameters as given,and allocate each vertex's edge dynamically. those structs have been defined as shown
+at the beginning of the program and they are for presenting an edge connecting vertex to another and storing vertex IDs and dynamic list of edges.
+Other tasks were about creating an abstract class called graphbase with virtual void addedge()function and delivering two classes from it, directedgraph and weightedgraph and 
+those derived classes were to show inheritance and polymorphism.the task was completed on the block that follows that of structs,and those derived class has a destructor 
+for cleaning the dynamic memory, and consists of functions such as addvertex() and removevertex() that will allow to add avertex and its id and delete it using its id,
+and after an operation, it will create a new array for all vertices available and delete the old one. there is also a another funtion called display() that will print out all 
+vertices and their edges in the form of (to, from). we are also having a function addedge() as given in the task adds edges on both directed and weighted graphs with weight,
+copies vertyices from old edge array to new edge array and add a vertex to the new array, and deletes the old array to free memory.
+we are having the main function that is helping to read number of vertices and edges, adding edges and vertices with their IDs  in both graphs, receiving weight entered by user,
+removing the vertex using its ID given by a user, exiting program if a user asks too,and displaying adjacency list for both graphs as outputs. generally, the main function is
+managing the user inputs and providing outputs.
+BELOW ARE C++ CODES FOR THE ABOVE PROGRAM:
+#include <iostream>
+using namespace std;
+
+struct Edge { int to; float weight; };              // Edge struct for destination and weight
+struct Vertex { int id; Edge* edges; int edgeCount; Vertex() : edges(NULL), edgeCount(0) {} }; // Vertex with dynamic edges
+
+class GraphBase {
+public:
+    Vertex* vertices = NULL; int vertexCount = 0;  //this line is for Dynamic array of vertices
+
+    virtual ~GraphBase() {                         // Destructor frees dynamic memory
+        for (int i = 0; i < vertexCount; i++) delete[] vertices[i].edges;
+        delete[] vertices;
+    }
+
+    void addVertex(int id) {                       // Add vertex by resizing array and deleting the old array which is smaller than the new one.
+        Vertex* temp = new Vertex[vertexCount + 1];
+        for (int i = 0; i < vertexCount; i++) temp[i] = vertices[i];
+        temp[vertexCount].id = id; temp[vertexCount].edges = NULL; temp[vertexCount].edgeCount = 0;
+        delete[] vertices; vertices = temp; vertexCount++;
+    }
+
+    void removeVertex(int id) {                     // Remove vertex by using its id
+        int idx = -1;
+        for (int i = 0; i < vertexCount; i++) if (vertices[i].id == id) { idx = i; break; }
+        if (idx == -1) return;                      // if Vertex not found, do nothing
+        delete[] vertices[idx].edges;               // Delete edges of removed vertex
+
+        Vertex* temp = new Vertex[vertexCount - 1]; // New array which is the smallest one
+        for (int i = 0, j = 0; i < vertexCount; i++)
+            if (i != idx) temp[j++] = vertices[i]; // Copy all except removed vertex
+
+        delete[] vertices; vertices = temp; vertexCount--;
+    }
+
+    virtual void addEdge(int from, int to, float w) = 0; // Pure virtual for addEdge
+
+    void display() {                                //this will be used to Display vertices and their edges
+        for (int i = 0; i < vertexCount; i++) {
+            cout << "Vertex " << vertices[i].id << ": ";
+            for (int j = 0; j < vertices[i].edgeCount; j++) {
+                Edge* e = vertices[i].edges + j;
+                cout << "(" << e->to << "," << e->weight << ") ";
+            }
+            cout << "\n";
+        }
+    }
+};
+//derived class directedgraph from base class directedgraph
+class DirectedGraph : public GraphBase {
+public:
+    void addEdge(int from, int to, float w) override { // Add directed edge
+        int idx = -1;
+        for (int i = 0; i < vertexCount; i++) if (vertices[i].id == from) { idx = i; break; }
+        if (idx == -1) return;                        //if the Vertex not found,
+        Edge* temp = new Edge[vertices[idx].edgeCount + 1];
+        for (int i = 0; i < vertices[idx].edgeCount; i++) temp[i] = vertices[idx].edges[i];
+        temp[vertices[idx].edgeCount] = {to, w};     // Add new edge
+        delete[] vertices[idx].edges;
+        vertices[idx].edges = temp;
+        vertices[idx].edgeCount++;
+    }
+};
+//derived class weightedgraph from base class graphbase
+class WeightedGraph : public GraphBase {
+public:
+    void addEdge(int from, int to, float w) override { // Add undirected weighted edge
+        addSingleEdge(from, to, w);
+        addSingleEdge(to, from, w);
+    }
+private:
+    void addSingleEdge(int from, int to, float w) {
+        int idx = -1;
+        for (int i = 0; i < vertexCount; i++) if (vertices[i].id == from) { idx = i; break; }
+        if (idx == -1) return;
+        Edge* temp = new Edge[vertices[idx].edgeCount + 1];
+        for (int i = 0; i < vertices[idx].edgeCount; i++) temp[i] = vertices[idx].edges[i];
+        temp[vertices[idx].edgeCount] = {to, w};
+        delete[] vertices[idx].edges;
+        vertices[idx].edges = temp;
+        vertices[idx].edgeCount++;
+    }
+};
+//the main function of the program 
+int main() {
+    int V, E;
+    cout << "Vertices? "; cin >> V;
+    cout << "Edges? "; cin >> E;
+
+    GraphBase* graphs[2] = { new DirectedGraph(), new WeightedGraph() };
+
+    for (int i = 1; i <= V; i++) {                  //this allows to Add vertices with their ID
+        graphs[0]->addVertex(i);
+        graphs[1]->addVertex(i);
+    }
+
+    for (int i = 0; i < E; i++) {                    //this allows to Add edges from user input
+        int f, t; float w;
+        cout << "Edge (from to weight): ";
+        cin >> f >> t >> w;
+        graphs[0]->addEdge(f, t, w);
+        graphs[1]->addEdge(f, t, w);
+    }
+
+    cout << "\nDirected Graph:\n"; graphs[0]->display();
+    cout << "\nWeighted Graph:\n"; graphs[1]->display();
+
+    int removeId;
+    cout << "\nEnter a vertex ID to remove (or 0 to skip): ";
+    cin >> removeId;
+
+    if (removeId != 0) {                             // this is to exit the program when the user input is 0
+        graphs[0]->removeVertex(removeId);
+        graphs[1]->removeVertex(removeId);
+
+        cout << "\nDirected Graph after removal:\n"; graphs[0]->display();
+        cout << "\nWeighted Graph after removal:\n"; graphs[1]->display();
+    }
+
+    delete graphs[0]; delete graphs[1];              // Free memory
+    return 0;
+}
+
+ 
+ 
